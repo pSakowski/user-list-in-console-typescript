@@ -1,0 +1,11 @@
+{
+  "name": "user-list-in-console-typescript",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "inquirer": "^8.2.4",
+    "nodemon": "^2.0.20",
+    "ts-node": "^8.10.2"
+  }
+}
