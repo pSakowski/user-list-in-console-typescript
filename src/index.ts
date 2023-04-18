@@ -4,6 +4,7 @@ const consola = require('consola');
 enum Action {
   List = "list",
   Add = "add",
+  Edit = "edit",
   Remove = "remove",
   Quit = "quit"
 }
@@ -21,45 +22,6 @@ type InquirerAnswers = {
 interface User {
   name: string;
   age: number;
-}
-
-const startApp = () => {
-  inquirer.prompt([{
-    name: 'action',
-    type: 'input',
-    message: 'How can I help you?',
-  }]).then(async (answers: InquirerAnswers) => {
-    switch (answers.action) {
-      case Action.List:
-        users.showAll();
-        break;
-      case Action.Add:
-        const user = await inquirer.prompt([{
-          name: 'name',
-          type: 'input',
-          message: 'Enter name',
-        }, {
-          name: 'age',
-          type: 'number',
-          message: 'Enter age',
-        }]);
-        users.add(user);
-        break;
-      case Action.Remove:
-        const name = await inquirer.prompt([{
-          name: 'name',
-          type: 'input',
-          message: 'Enter name',
-        }]);
-        users.remove(name.name);
-        break;
-      case Action.Quit:
-        Message.showColorized(MessageVariant.Info, "Bye bye!");
-        return;
-    }
-
-    startApp();
-  });
 }
 
 class Message {
@@ -86,7 +48,7 @@ class Message {
   }
 
   public static showColorized(variant: MessageVariant, text: string): void {
-    switch(variant) {
+    switch (variant) {
       case MessageVariant.Success:
         consola.success(text);
         break;
@@ -123,6 +85,15 @@ class UsersData {
     }
   }
 
+  public edit(index: number, newUser: User): void {
+    if (newUser.age > 0 && newUser.name.length > 0) {
+      this.data[index] = newUser;
+      Message.showColorized(MessageVariant.Success, "User has been successfully edited!");
+    } else {
+      Message.showColorized(MessageVariant.Error, "Wrong data!");
+    }
+  }
+
   public remove(name: string): void {
     const userIndex = this.data.findIndex(user => user.name === name);
     if (userIndex !== -1) {
@@ -134,7 +105,68 @@ class UsersData {
   }
 }
 
+const startApp = () => {
+  inquirer.prompt([{
+    name: 'action',
+    type: 'input',
+    message: 'How can I help you?',
+  }]).then(async (answers: InquirerAnswers) => {
+    switch (answers.action) {
+      case Action.List:
+        users.showAll();
+        break;
+      case Action.Add:
+        const user = await inquirer.prompt([{
+          name: 'name',
+          type: 'input',
+          message: 'Enter name',
+        }, {
+          name: 'age',
+          type: 'number',
+          message: 'Enter age',
+        }]);
+        users.add(user);
+        break;
+      case Action.Remove:
+        const removeName = await inquirer.prompt([{
+          name: 'name',
+          type: 'input',
+          message: 'Enter name',
+        }]);
+        users.remove(removeName.name);
+        break;
+      case Action.Edit:
+        const { name, age } = await inquirer.prompt([{
+          name: 'name',
+          type: 'input',
+          message: 'Enter name',
+        }, {
+          name: 'age',
+          type: 'number',
+          message: 'Enter age',
+        }]);
+        const userIndex = users.data.findIndex(user => user.name === name);
+        if (userIndex !== -1) {
+          const newUser = { name, age };
+          users.edit(userIndex, newUser);
+        } else {
+          Message.showColorized(MessageVariant.Error, "User not found");
+        }
+        break;
+      case Action.Quit:
+        Message.showColorized(MessageVariant.Info, "Bye bye!");
+        return;
+      default:
+        Message.showColorized(MessageVariant.Error, "Command not found");
+        break;
+    }
+
+    startApp();
+  });
+}
+
 const users = new UsersData();
+
 console.log("\n");
 console.info("???? Welcome to the UsersApp!");
 console.log("====================================");
@@ -142,6 +174,7 @@ Message.showColorized(MessageVariant.Info, "Available actions");
 console.log("\n");
 console.log("list – show all users");
 console.log("add – add new user to the list");
+console.log("edit – edit user from list");
 console.log("remove – remove user from the list");
 console.log("quit – quit the app");
 console.log("\n");
