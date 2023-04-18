@@ -4,11 +4,15 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^18.15.11",
     "inquirer": "^8.2.4",
     "nodemon": "^2.0.20",
     "ts-node": "^8.10.2"
   },
   "scripts": {
     "watch": "nodemon"
+  },
+  "dependencies": {
+    "consola": "^3.1.0"
   }
 }
